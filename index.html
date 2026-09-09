@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Доктор Растений</title>
+    <style>
+        body { font-family: Arial; max-width: 600px; margin: 50px auto; padding: 20px; }
+        h1 { color: #2e7d32; }
+        input[type="file"] { margin: 20px 0; }
+        button { background: #2e7d32; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+        #result { margin-top: 20px; padding: 15px; background: #f1f8e9; border-radius: 5px; white-space: pre-wrap; }
+        img { max-width: 100%; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🌿 Доктор Растений</h1>
+    <p>Загрузи фото больного растения — я определю болезнь и лечение.</p>
+    <input type="file" id="photo" accept="image/*">
+    <br>
+    <button onclick="analyze()">Анализировать</button>
+    <div id="result"></div>
+
+    <script>
+        async function analyze() {
+            const file = document.getElementById('photo').files[0];
+            if (!file) { alert('Выбери фото!'); return; }
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = '🔍 Анализирую...';
+            
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const base64 = e.target.result.split(',')[1];
+                
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({image: base64})
+                });
+                
+                const data = await response.json();
+                resultDiv.textContent = data.answer;
+            };
+            reader.readAsDataURL(file);
+        }
+    </script>
+</body>
+</html>
